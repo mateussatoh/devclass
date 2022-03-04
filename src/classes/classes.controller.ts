@@ -6,25 +6,27 @@ import {
   Body,
   Delete,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
-import { ClassService } from './class.service';
+import { ClassesService } from './classes.service';
 import { Class as ClassModel } from '@prisma/client';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('classes')
-export class ClassController {
-  constructor(private readonly classService: ClassService) {}
-
+export class ClassesController {
+  constructor(private readonly classService: ClassesService) {}
   @Get()
-  async getModules(): Promise<ClassModel[]> {
+  async getClases(): Promise<ClassModel[]> {
     return this.classService.classes({});
   }
   @Get(':id')
-  async getModuleById(@Param('id') id: string): Promise<ClassModel> {
+  async getClassById(@Param('id') id: string): Promise<ClassModel> {
     return this.classService.class({ id: id });
   }
 
   @Post()
-  async createModule(
+  @UseGuards(JwtAuthGuard)
+  async createClass(
     @Body()
     classData: {
       name: string;
@@ -45,7 +47,8 @@ export class ClassController {
   }
 
   @Patch(':id')
-  async patchModule(
+  @UseGuards(JwtAuthGuard)
+  async patchClass(
     @Param('id') id: string,
     @Body()
     classData: {
@@ -62,7 +65,8 @@ export class ClassController {
   }
 
   @Delete(':id')
-  async deletePost(@Param('id') id: string): Promise<ClassModel> {
+  @UseGuards(JwtAuthGuard)
+  async deleteClass(@Param('id') id: string): Promise<ClassModel> {
     return this.classService.deleteClass({ id: id });
   }
 }

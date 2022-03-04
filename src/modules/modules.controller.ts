@@ -4,20 +4,17 @@ import {
   Param,
   Post,
   Body,
-  Put,
   Delete,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
-import { ModuleService } from './module.service';
-import { ClassService } from './class.service';
-import { Module as ModuleModel, Class as ClassModel } from '@prisma/client';
+import { ModulesService } from './modules.service';
+import { Module as ModuleModel } from '@prisma/client';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('modules')
-export class ModuleController {
-  constructor(
-    private readonly moduleService: ModuleService,
-    private readonly classService: ClassService,
-  ) {}
+export class ModulesController {
+  constructor(private readonly moduleService: ModulesService) {}
 
   @Get()
   async getModules(): Promise<ModuleModel[]> {
@@ -29,6 +26,7 @@ export class ModuleController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async createModule(
     @Body()
     moduleData: {
@@ -46,6 +44,7 @@ export class ModuleController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   async patchModule(
     @Param('id') id: string,
     @Body()
@@ -63,7 +62,8 @@ export class ModuleController {
   }
 
   @Delete(':id')
-  async deletePost(@Param('id') id: string): Promise<ModuleModel> {
+  @UseGuards(JwtAuthGuard)
+  async deleteModule(@Param('id') id: string): Promise<ModuleModel> {
     return this.moduleService.deleteModule({ id: id });
   }
 }
