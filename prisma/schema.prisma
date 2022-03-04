@@ -11,20 +11,19 @@ datasource db {
 }
 
 model Class {
-    id                Int      @id @default(autoincrement())
+    id                String  @id @default(uuid())
     name              String
     durationInSeconds Int
-    date              DateTime
-    Modules           Modules? @relation(fields: [modulesId], references: [id])
-    modulesId         Int
+    date              String
+    Modules           Module? @relation(fields: [modulesId], references: [id])
+    modulesId         String
 }
 
-model Modules {
-    id                Int     @id @default(autoincrement())
+model Module {
+    id                String  @id @default(uuid())
     name              String
     description       String
-    durationInSeconds Int
+    durationInSeconds Int     @default(0)
     tech              String
     classes           Class[]
-    totalClasses      Int
 }
