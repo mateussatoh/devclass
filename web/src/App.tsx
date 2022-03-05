@@ -1,11 +1,9 @@
-import React, { FC } from "react";
-import { Button } from "antd";
 import "./App.less";
-
-const App: FC = () => (
-   <div className="App">
-      <Button type="primary">Button</Button>
-   </div>
-);
-
-export default App;
+import Topbar from "./components/Topbar";
+export default function App() {
+   return (
+      <div className="App">
+         <Topbar />
+      </div>
+   );
+}
