@@ -21,17 +21,16 @@ model User {
 model Class {
     id                String  @id @default(uuid())
     name              String
-    durationInSeconds Int
+    durationInMinutes Int
     date              String
     Modules           Module? @relation(fields: [modulesId], references: [id])
     modulesId         String
 }
 
 model Module {
-    id                String  @id @default(uuid())
-    name              String
-    description       String
-    durationInSeconds Int     @default(0)
-    tech              String
-    classes           Class[]
+    id          String  @id @default(uuid())
+    name        String  @unique
+    description String
+    tech        String
+    classes     Class[]
 }

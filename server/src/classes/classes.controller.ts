@@ -30,15 +30,15 @@ export class ClassesController {
     @Body()
     classData: {
       name: string;
-      durationInSeconds: number;
+      durationInMinutes: number;
       date: string;
       modulesId: string;
     },
   ): Promise<ClassModel> {
-    const { name, durationInSeconds, date, modulesId } = classData;
+    const { name, durationInMinutes, date, modulesId } = classData;
     return this.classService.createClass({
       name,
-      durationInSeconds,
+      durationInMinutes,
       date,
       Modules: {
         connect: { id: modulesId },
@@ -53,14 +53,14 @@ export class ClassesController {
     @Body()
     classData: {
       name: string;
-      durationInSeconds: number;
+      durationInMinutes: number;
       date: string;
     },
   ): Promise<ClassModel> {
-    const { name, durationInSeconds, date } = classData;
+    const { name, durationInMinutes, date } = classData;
     return this.classService.updateClass({
       where: { id: id },
-      data: { name, durationInSeconds, date },
+      data: { name, durationInMinutes, date },
     });
   }
 
