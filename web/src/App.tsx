@@ -1,27 +1,36 @@
 import "./App.less";
-import { Layout } from "antd";
+import { Layout, Space } from "antd";
 import Logo from "./assets/Logo.png";
 
-import "./App.less";
 import { Divider, Image, Collapse, Row, Col, Typography } from "antd";
 import Typewriter from "typewriter-effect";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
-import AWSIcon from "./assets/logos/aws.svg";
 import AngularIcon from "./assets/logos/angular.svg";
 import DjangoIcon from "./assets/logos/django.svg";
 import DotnetIcon from "./assets/logos/dotnet.svg";
-import FlutterIcon from "./assets/logos/flutter.svg";
 import GoIcon from "./assets/logos/go.svg";
 import KotlinIcon from "./assets/logos/kotlin.svg";
 import ReactIcon from "./assets/logos/react.svg";
 import VueIcon from "./assets/logos/vue.svg";
-import NestIcon from "./assets/logos/nest.svg";
+import NodeIcon from "./assets/logos/nodejs.svg";
 import ModulesService from "./services/api.modules";
 const { Panel } = Collapse;
 
 const { Header, Footer, Content } = Layout;
 const { Title } = Typography;
+
+interface IModule {
+   name: string;
+   tech: string;
+   classes: never[];
+}
+
+interface IClass {
+   name: string;
+   date: string;
+   durationInMinutes: string;
+}
 
 export default function App() {
    const [modules, setModules] = useState([]);
@@ -29,14 +38,35 @@ export default function App() {
    useEffect(() => {
       async function fetchData() {
          const modules = await ModulesService.modules();
-         console.log(
-            "🚀 ~ file: App.tsx ~ line 32 ~ fetchData ~ modules",
-            modules
-         );
          setModules(modules);
       }
       fetchData();
    }, []);
+
+   function renderTechIcon(tech: string) {
+      switch (tech) {
+         case "ReactJS":
+            return <Image preview={false} width={32} src={ReactIcon} />;
+         case "AngularJS":
+            return <Image preview={false} width={32} src={AngularIcon} />;
+         case "Kotlin":
+            return <Image preview={false} width={32} src={KotlinIcon} />;
+         case "Django":
+            return <Image preview={false} width={32} src={DjangoIcon} />;
+         case "Basico":
+            return <Image preview={false} width={32} src={DjangoIcon} />;
+         case "VueJS":
+            return <Image preview={false} width={32} src={VueIcon} />;
+         case "Go":
+            return <Image preview={false} width={32} src={GoIcon} />;
+         case "NodeJS":
+            return <Image preview={false} width={32} src={NodeIcon} />;
+         case "React Native":
+            return <Image preview={false} width={32} src={ReactIcon} />;
+         case ".NET":
+            return <Image preview={false} width={32} src={DotnetIcon} />;
+      }
+   }
 
    return (
       <Layout>
@@ -81,17 +111,36 @@ export default function App() {
                   </Title>
                </Col>
                <Col span={11} offset={1}>
-                  <Collapse bordered={false} defaultActiveKey={["1"]} accordion>
-                     <Panel
-                        header={<Title level={4}>React</Title>}
-                        extra={
-                           <Image preview={false} width={32} src={ReactIcon} />
-                        }
-                        key="1"
-                     >
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Atque, beatae.
-                     </Panel>
+                  <Collapse
+                     bordered={false}
+                     defaultActiveKey={["1"]}
+                     accordion
+                     className="scrollableModules"
+                  >
+                     {modules.map((module: IModule, index) => {
+                        const { classes } = module;
+                        return (
+                           <Panel
+                              header={
+                                 <Space>
+                                    {renderTechIcon(module.tech)}
+                                    <Title level={4}>{module.name}</Title>
+                                 </Space>
+                              }
+                              extra={
+                                 <Title level={5}>{classes.length} aulas</Title>
+                              }
+                              key={index}
+                           >
+                              {classes.map((_class: IClass) => (
+                                 <div className="classCard">
+                                    <Title level={5}>{_class.name}</Title>
+                                    <h4>{_class.date}</h4>
+                                 </div>
+                              ))}
+                           </Panel>
+                        );
+                     })}
                   </Collapse>
                </Col>
             </Row>
