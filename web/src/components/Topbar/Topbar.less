@@ -1,15 +1,40 @@
 @import "~antd/dist/antd.less";
 
 .headerRight {
-   margin-left: auto;
+   width: 200px;
+   float: right;
+   margin-right: 20px;
 }
 
 .header {
    display: flex;
    height: 70px;
    align-items: center;
+   border-bottom: 1px solid white;
 }
 
 .modalInput {
    margin-bottom: 10px;
+}
+
+.links {
+   display: flex;
+   list-style: none;
+   height: 100%;
+   width: 200px;
+   margin: 0;
+   align-items: center;
+   justify-content: space-around;
+}
+
+.link {
+   padding: auto 0 auto 0;
+}
+
+.logo {
+   float: left;
+   width: 200px;
+   height: 64px;
+   background-image: url("../../assets/Logo.png");
+   background-size: cover;
 }

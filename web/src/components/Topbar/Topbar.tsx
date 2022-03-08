@@ -1,10 +1,16 @@
 import { useState, useContext } from "react";
-import { LoginOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Modal, Button, Input } from "antd";
+import {
+   LoginOutlined,
+   LockOutlined,
+   UserOutlined,
+   LogoutOutlined,
+} from "@ant-design/icons";
+import { Modal, Button, Input, Typography } from "antd";
 
 import "./Topbar.less";
 import Logo from "../../assets/Logo.png";
 import { Context } from "../../context/AuthContext";
+import { Link } from "react-router-dom";
 
 export default function Topbar() {
    const AuthContext = useContext(Context);
@@ -21,26 +27,56 @@ export default function Topbar() {
    async function handleOk(username: string, password: string) {
       setConfirmLoading(true);
       await AuthContext?.login(username, password);
+      setConfirmLoading(false);
+      setVisible(false);
    }
 
    function handleCancel() {
       setVisible(false);
    }
 
+   function logout() {
+      AuthContext?.logout();
+   }
+
    return (
       <>
          <div className="header">
             <img src={Logo} alt="Logo do devclass" height="100%" />
-            <Button
-               className="headerRight"
-               type="primary"
-               shape="round"
-               icon={<LoginOutlined />}
-               size="large"
-               onClick={showModal}
-            >
-               Fazer login
-            </Button>
+            <ul className="links">
+               <li>
+                  <Link to="/" className="link">
+                     <h4>Home</h4>
+                  </Link>
+               </li>
+               <li className="link">
+                  <Link to="/admin" className="link">
+                     <h4>Admin</h4>
+                  </Link>
+               </li>
+            </ul>
+
+            {AuthContext?.isUserAuthenticated ? (
+               <Button
+                  type="primary"
+                  shape="default"
+                  className="headerRight"
+                  icon={<LogoutOutlined />}
+                  size="large"
+                  onClick={logout}
+               ></Button>
+            ) : (
+               <Button
+                  type="primary"
+                  shape="default"
+                  className="headerRight"
+                  icon={<LoginOutlined />}
+                  size="large"
+                  onClick={showModal}
+               >
+                  Fazer login
+               </Button>
+            )}
          </div>
          <Modal
             title="Faça login usando sua conta devclass"
