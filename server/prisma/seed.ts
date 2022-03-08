@@ -2,6 +2,27 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.user.upsert({
+    where: { email: 'admin@mail.com' },
+    update: {},
+    create: {
+      username: 'admin_verzel',
+      email: 'admin@mail.com',
+      password: '123456',
+      isAdmin: true,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'mateus@mail.com' },
+    update: {},
+    create: {
+      username: 'mateus',
+      email: 'mateus@mail.com',
+      password: '123456',
+    },
+  });
+
   await prisma.module.upsert({
     where: { name: 'Clone da Netflix em ReactJS' },
     update: {},
@@ -319,7 +340,7 @@ async function main() {
     where: { name: 'API REST em .NET' },
     update: {},
     create: {
-      name: 'Serviços em .NET',
+      name: 'API REST em .NET',
       description: '',
       tech: '.NET',
       classes: {
