@@ -46,7 +46,18 @@ export default function ModulesSection() {
    useEffect(() => {
       async function fetchData() {
          getModulesService()
-            .then((modules) => setModules(modules))
+            .then((modules) => {
+               modules.sort(function (a: IModule, b: IModule) {
+                  if (a.name < b.name) {
+                     return -1;
+                  }
+                  if (a.name > b.name) {
+                     return 1;
+                  }
+                  return 0;
+               });
+               setModules(modules);
+            })
             .catch(() => {
                notification["error"]({
                   message: "Erro ao tentar receber os módulos da API",
