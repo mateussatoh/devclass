@@ -12,6 +12,8 @@ module.exports = {
                             "@layout-header-background": "#22212C",
                             "@background-color-light": "#454158",
                             "@table-body-sort-bg": "#7970A9",
+                            "@table-header-sort-bg": "#7970A9",
+                            "@input-addon-bg": "#454158",
                             "@heading-color": "#F8F8F2",
                             "@text-color": "#F8F8F2",
                             "@text-color-secondary": "#F8F8F2",

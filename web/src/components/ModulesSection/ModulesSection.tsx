@@ -19,6 +19,7 @@ import KotlinIcon from "../../assets/logos/kotlin.svg";
 import ReactIcon from "../../assets/logos/react.svg";
 import VueIcon from "../../assets/logos/vue.svg";
 import NodeIcon from "../../assets/logos/nodejs.svg";
+import LogoSmall from "../../assets/Logo.png";
 import { getModulesService } from "../../services/api.modules";
 
 const { Panel } = Collapse;
@@ -79,6 +80,8 @@ export default function ModulesSection() {
             return <Image preview={false} width={24} src={ReactIcon} />;
          case ".NET":
             return <Image preview={false} width={24} src={DotnetIcon} />;
+         default:
+            return <Image preview={false} width={24} src={LogoSmall} />;
       }
    }
 

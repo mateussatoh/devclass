@@ -235,7 +235,7 @@ export default function Home() {
             notification["error"]({
                message: "Erro ao tentar modificar a aula",
                description:
-                  "Verifique se o banco de dados local e a API foram iniciados.",
+                  "Verifique se o banco de dados local e a API foram iniciados. Você não pode criar uma aula com o mesmo nome.",
             });
          })
          .finally(() => {
@@ -244,6 +244,10 @@ export default function Home() {
    }
 
    async function deleteClass(selectedClass: IClass) {
+      console.log(
+         "🚀 ~ file: Admin.tsx ~ line 247 ~ deleteClass ~ selectedClass",
+         selectedClass
+      );
       setIsLoading(true);
       deleteClassService(selectedClass.id)
          .then(async () => {
@@ -280,8 +284,8 @@ export default function Home() {
          .catch(() => {
             notification["error"]({
                message: "Erro ao deletar a aula",
-               description:
-                  "Verifique se o banco de dados local e a API foram iniciados.",
+               description: `Verifique se o banco de dados local e a API foram iniciados. 
+                  Você não pode deletar um módulo com aulas presentes e criar um módulo com nome repetido!!`,
             });
          })
          .finally(() => {
@@ -304,7 +308,7 @@ export default function Home() {
             notification["error"]({
                message: "Erro ao tentar criar a aula",
                description:
-                  "Verifique se o banco de dados local e a API foram iniciados.",
+                  "Verifique se o banco de dados local e a API foram iniciados. Você não pode criar uma aula com o mesmo nome.",
             });
          })
          .finally(() => {
@@ -332,8 +336,8 @@ export default function Home() {
          .catch(() => {
             notification["error"]({
                message: "Erro ao tentar modificar o módulo",
-               description:
-                  "Verifique se o banco de dados local e a API foram iniciados.",
+               description: `Verifique se o banco de dados local e a API foram iniciados. 
+               Você não pode deletar um módulo com aulas presentes e criar um módulo com nome repetido!!`,
             });
          })
          .finally(() => {
@@ -356,8 +360,8 @@ export default function Home() {
          .catch(() => {
             notification["error"]({
                message: "Erro ao tentar criar o módulo",
-               description:
-                  "Verifique se o banco de dados local e a API foram iniciados.",
+               description: `Verifique se o banco de dados local e a API foram iniciados. 
+               Você não pode deletar um módulo com aulas presentes e criar um módulo com nome repetido!!`,
             });
          })
          .finally(() => {
@@ -606,18 +610,22 @@ export default function Home() {
                }
             />
             <Select
-               defaultValue={modules[0].id}
+               defaultValue="selectAValue"
                className="select"
                style={{ width: 340 }}
-               onChange={(moduleId) =>
+               onChange={(modulesId) =>
                   setSelectedClass((pre) => {
                      return {
                         ...pre,
-                        moduleId: moduleId,
+                        modulesId: modulesId,
                      };
                   })
                }
             >
+               <Option disabled value="selectAValue">
+                  Selecione um módulo
+               </Option>
+               ;
                {modules.map((module, index) => {
                   return <Option value={module.id}>{module.name}</Option>;
                })}

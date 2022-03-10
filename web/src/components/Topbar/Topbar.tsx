@@ -62,6 +62,7 @@ export default function Topbar() {
 
    function handleCancel() {
       setVisible(false);
+      setNewAccountModal(false);
    }
 
    function logout() {

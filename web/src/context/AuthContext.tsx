@@ -52,6 +52,7 @@ function AuthProvider({ children }: Props) {
                message: "Você foi autenticado.",
                description: "A área do admin foi liberada.",
             });
+            window.location.reload();
          })
          .catch(() => {
             notification["error"]({
@@ -66,7 +67,7 @@ function AuthProvider({ children }: Props) {
       setIsUserAuthenticated(false);
       Cookies.set("access_token", "");
       Cookies.set("user", "");
-      navigate("/", { replace: false });
+      window.location.reload();
    }
    return (
       <Context.Provider
