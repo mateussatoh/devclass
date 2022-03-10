@@ -5,7 +5,7 @@ import Topbar from "../../components/Topbar";
 import Hero from "../../components/Hero";
 import ModulesSection from "../../components/ModulesSection";
 
-const { Header, Footer, Content } = Layout;
+const { Content } = Layout;
 
 export default function Home() {
    return (
@@ -15,7 +15,6 @@ export default function Home() {
             <Hero />
             <ModulesSection />
          </Content>
-         <Footer>Footer</Footer>
       </Layout>
    );
 }

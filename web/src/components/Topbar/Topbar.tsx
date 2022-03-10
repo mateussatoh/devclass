@@ -5,12 +5,13 @@ import {
    UserOutlined,
    LogoutOutlined,
 } from "@ant-design/icons";
-import { Modal, Button, Input, Typography } from "antd";
+import { Modal, Button, Input, Typography, Select } from "antd";
 
 import "./Topbar.less";
 import Logo from "../../assets/Logo.png";
 import { Context } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
+import { Option } from "antd/lib/mentions";
 
 export default function Topbar() {
    const AuthContext = useContext(Context);
@@ -43,28 +44,31 @@ export default function Topbar() {
       <>
          <div className="header">
             <img src={Logo} alt="Logo do devclass" height="100%" />
-            <ul className="links">
-               <li>
-                  <Link to="/" className="link">
-                     <h4>Home</h4>
-                  </Link>
-               </li>
-               <li className="link">
-                  <Link to="/admin" className="link">
-                     <h4>Admin</h4>
-                  </Link>
-               </li>
-            </ul>
 
             {AuthContext?.isUserAuthenticated ? (
-               <Button
-                  type="primary"
-                  shape="default"
-                  className="headerRight"
-                  icon={<LogoutOutlined />}
-                  size="large"
-                  onClick={logout}
-               ></Button>
+               <>
+                  <ul className="links">
+                     <li>
+                        <Link to="/" className="link">
+                           <h4>Home</h4>
+                        </Link>
+                     </li>
+                     <li className="link">
+                        <Link to="/admin" className="link">
+                           <h4>Admin</h4>
+                        </Link>
+                     </li>
+                  </ul>
+
+                  <Button
+                     type="primary"
+                     shape="default"
+                     className="headerRight"
+                     icon={<LogoutOutlined />}
+                     size="large"
+                     onClick={logout}
+                  ></Button>
+               </>
             ) : (
                <Button
                   type="primary"

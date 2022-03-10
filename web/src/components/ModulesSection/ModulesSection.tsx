@@ -1,6 +1,15 @@
 import "./ModulesSection.less";
 
-import { Divider, Image, Collapse, Row, Col, Typography, Space } from "antd";
+import {
+   Divider,
+   Image,
+   Collapse,
+   Row,
+   Col,
+   Typography,
+   Space,
+   notification,
+} from "antd";
 import { useEffect, useState } from "react";
 import AngularIcon from "../../assets/logos/angular.svg";
 import DjangoIcon from "../../assets/logos/django.svg";
@@ -10,7 +19,7 @@ import KotlinIcon from "../../assets/logos/kotlin.svg";
 import ReactIcon from "../../assets/logos/react.svg";
 import VueIcon from "../../assets/logos/vue.svg";
 import NodeIcon from "../../assets/logos/nodejs.svg";
-import ModulesService from "../../services/api.modules";
+import { getModulesService } from "../../services/api.modules";
 
 const { Panel } = Collapse;
 
@@ -29,12 +38,21 @@ interface IClass {
 }
 
 export default function ModulesSection() {
-   const [modules, setModules] = useState([]);
+   const [modules, setModules] = useState([
+      { name: "", tech: "", classes: [], id: "" },
+   ]);
 
    useEffect(() => {
       async function fetchData() {
-         const modules = await ModulesService.modules();
-         setModules(modules);
+         getModulesService()
+            .then((modules) => setModules(modules))
+            .catch(() => {
+               notification["error"]({
+                  message: "Erro ao tentar receber os módulos da API",
+                  description:
+                     "Verifique se o banco de dados local e a API foram iniciados.",
+               });
+            });
       }
       fetchData();
    }, []);
@@ -88,7 +106,7 @@ export default function ModulesSection() {
                   accordion
                   className="scrollableModules"
                >
-                  {modules.map((module: IModule, index) => {
+                  {modules.map((module, index) => {
                      const { classes } = module;
                      return (
                         <Panel

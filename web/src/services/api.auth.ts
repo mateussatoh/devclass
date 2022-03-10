@@ -1,5 +1,8 @@
-import Instance from "./instance";
+import axios from "axios";
 
+const Instance = axios.create({
+   baseURL: "http://localhost:3001/auth",
+});
 interface IUserAuthenticated {
    id: string;
    username: string;
@@ -8,19 +11,17 @@ interface IUserAuthenticated {
    access_token: string;
 }
 
-class AuthService {
-   async login(loginData: {
-      username: string;
-      password: string;
-   }): Promise<IUserAuthenticated> {
-      const { username, password } = loginData;
-      const { data } = await Instance.authInstance.post("/login", {
-         username,
-         password,
-      });
+async function loginService(loginData: {
+   username: string;
+   password: string;
+}): Promise<IUserAuthenticated> {
+   const { username, password } = loginData;
+   const { data } = await Instance.post("/login", {
+      username,
+      password,
+   });
 
-      return data;
-   }
+   return data;
 }
 
-export default new AuthService();
+export { loginService };

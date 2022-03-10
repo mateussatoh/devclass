@@ -1,20 +1,557 @@
 import "./Admin.less";
-import { Layout } from "antd";
+import { Button, Input, Layout, notification, Select, Table } from "antd";
 
 import Topbar from "../../components/Topbar";
-import Hero from "../../components/Hero";
-import ModulesSection from "../../components/ModulesSection";
+import {
+   EditOutlined,
+   DeleteOutlined,
+   PlusCircleOutlined,
+} from "@ant-design/icons";
+import { Option } from "antd/lib/mentions";
+import { useEffect, useState } from "react";
 
-const { Header, Footer, Content } = Layout;
+import {
+   createModuleService,
+   deleteModuleService,
+   getModulesService,
+   patchModuleService,
+} from "../../services/api.modules";
+import {
+   createClassService,
+   deleteClassService,
+   getClassesService,
+   patchClassService,
+} from "../../services/api.classes";
 
+import Modal from "antd/lib/modal/Modal";
+
+interface IModule {
+   id: string;
+   name: string;
+   tech: string;
+}
+interface IClass {
+   id: string;
+   name: string;
+   date: string;
+   durationInMinutes: number;
+   moduleId: string;
+}
+
+const { Content } = Layout;
 export default function Home() {
+   const [selectedView, setSelectedView] = useState("modules");
+   const [modules, setModules] = useState([
+      { name: "", tech: "", classes: [], id: "" },
+   ]);
+   const [classes, setClasses] = useState([]);
+   const [moduleModalVisible, setModuleModalVisible] = useState(false);
+   const [classModalVisible, setClassModalVisible] = useState(false);
+   const [createModuleModal, setCreateModuleModal] = useState(false);
+   const [createClassModal, setCreateClassModal] = useState(false);
+   const [isLoading, setIsLoading] = useState(false);
+
+   const [selectedClass, setSelectedClass] = useState({
+      id: "",
+      name: "",
+      date: "",
+      durationInMinutes: 0,
+      moduleId: "",
+   });
+   const [selectedModule, setSelectedModule] = useState({
+      id: "",
+      name: "",
+      tech: "",
+   });
+
+   useEffect(() => {
+      async function fetchData() {
+         const modules = await getModulesService();
+         const classes = await getClassesService();
+
+         setModules(modules);
+         setClasses(classes);
+      }
+      fetchData();
+   }, []);
+
+   const modulesColumns = [
+      {
+         title: "Nome",
+         dataIndex: "name",
+         key: "name",
+      },
+      {
+         title: "Tech",
+         dataIndex: "tech",
+         key: "tech",
+      },
+      {
+         key: "actions",
+         render: (module: IModule) => {
+            return (
+               <>
+                  <Button
+                     type="primary"
+                     shape="default"
+                     className="headerRight"
+                     icon={<DeleteOutlined />}
+                     size="large"
+                     onClick={() => {
+                        deleteModule(module);
+                     }}
+                  ></Button>
+                  <Button
+                     type="primary"
+                     shape="default"
+                     className="headerRight"
+                     icon={<EditOutlined />}
+                     size="large"
+                     onClick={() => openModuleModal(module)}
+                  ></Button>
+               </>
+            );
+         },
+      },
+   ];
+
+   const classColumns = [
+      {
+         title: "Nome",
+         dataIndex: "name",
+         key: "name",
+      },
+      {
+         title: "Data",
+         dataIndex: "date",
+         key: "date",
+      },
+      {
+         title: "Duração (min)",
+         dataIndex: "durationInMinutes",
+         key: "duration",
+      },
+      {
+         key: "actions",
+         render: (_class: IClass) => {
+            return (
+               <>
+                  <Button
+                     type="primary"
+                     shape="default"
+                     className="headerRight"
+                     icon={<DeleteOutlined />}
+                     size="large"
+                     onClick={() => {
+                        deleteClass(_class);
+                     }}
+                  ></Button>
+                  <Button
+                     type="primary"
+                     shape="default"
+                     className="headerRight"
+                     icon={<EditOutlined />}
+                     size="large"
+                     onClick={() => openClassModal(_class)}
+                  ></Button>
+               </>
+            );
+         },
+      },
+   ];
+
+   function openClassModal(selectedClass: IClass) {
+      setSelectedClass(selectedClass);
+      setClassModalVisible(true);
+   }
+   async function patchClass(selectedClass: IClass) {
+      setIsLoading(true);
+      patchClassService(selectedClass)
+         .then(() => {
+            notification["success"]({
+               message: "Modificado com sucesso.",
+               description: "",
+            });
+            closeModal();
+         })
+         .catch(() => {
+            notification["error"]({
+               message: "Erro ao tentar modificar a aula",
+               description:
+                  "Verifique se o banco de dados local e a API foram iniciados.",
+            });
+         })
+         .finally(() => {
+            setIsLoading(false);
+         });
+   }
+
+   async function deleteClass(selectedClass: IClass) {
+      setIsLoading(true);
+      deleteClassService(selectedClass.id)
+         .then(() => {
+            notification["success"]({
+               message: "Deletado com sucesso.",
+               description: "",
+            });
+            closeModal();
+         })
+         .catch(() => {
+            notification["error"]({
+               message: "Erro ao deletar a aula",
+               description:
+                  "Verifique se o banco de dados local e a API foram iniciados.",
+            });
+         })
+         .finally(() => {
+            setIsLoading(false);
+         });
+   }
+
+   async function deleteModule(selectedModule: IModule) {
+      setIsLoading(true);
+      deleteModuleService(selectedModule.id)
+         .then(() => {
+            notification["success"]({
+               message: "Deletado com sucesso.",
+               description: "",
+            });
+            closeModal();
+         })
+         .catch(() => {
+            notification["error"]({
+               message: "Erro ao deletar a aula",
+               description:
+                  "Verifique se o banco de dados local e a API foram iniciados.",
+            });
+         })
+         .finally(() => {
+            setIsLoading(false);
+         });
+   }
+
+   async function createClass(selectedClass: IClass) {
+      setIsLoading(true);
+      createClassService(selectedClass)
+         .then(() => {
+            notification["success"]({
+               message: "Criado com sucesso.",
+               description: "",
+            });
+            closeModal();
+         })
+         .catch(() => {
+            notification["error"]({
+               message: "Erro ao tentar criar a aula",
+               description:
+                  "Verifique se o banco de dados local e a API foram iniciados.",
+            });
+         })
+         .finally(() => {
+            setIsLoading(false);
+         });
+   }
+
+   function openModuleModal(selectedModule: IModule) {
+      setSelectedModule(selectedModule);
+      setModuleModalVisible(true);
+   }
+
+   async function patchModule(selectedModule: IModule) {
+      setIsLoading(true);
+
+      patchModuleService(selectedModule)
+         .then(() => {
+            notification["success"]({
+               message: "Modificado com sucesso.",
+               description: "",
+            });
+            closeModal();
+         })
+         .catch(() => {
+            notification["error"]({
+               message: "Erro ao tentar modificar o módulo",
+               description:
+                  "Verifique se o banco de dados local e a API foram iniciados.",
+            });
+         })
+         .finally(() => {
+            setIsLoading(false);
+         });
+   }
+
+   async function createModule(selectedModule: IModule) {
+      setIsLoading(true);
+
+      createModuleService(selectedModule)
+         .then(() => {
+            notification["success"]({
+               message: "Criado com sucesso.",
+               description: "",
+            });
+            closeModal();
+         })
+         .catch(() => {
+            notification["error"]({
+               message: "Erro ao tentar criar o módulo",
+               description:
+                  "Verifique se o banco de dados local e a API foram iniciados.",
+            });
+         })
+         .finally(() => {
+            setIsLoading(false);
+         });
+   }
+
+   function closeModal() {
+      setSelectedModule({ id: "", name: "", tech: "" });
+      setSelectedClass({
+         id: "",
+         name: "",
+         date: "",
+         durationInMinutes: 0,
+         moduleId: "",
+      });
+      setClassModalVisible(false);
+      setModuleModalVisible(false);
+      setCreateClassModal(false);
+      setCreateModuleModal(false);
+   }
+
+   function setModule(selectedView: string) {
+      setSelectedView(selectedView);
+   }
+
    return (
-      <Layout>
-         <Topbar />
-         <Content className="content">
-            <h1>SOU A PAGINA ADMIN</h1>
-         </Content>
-         <Footer>Footer</Footer>
-      </Layout>
+      <>
+         <Layout>
+            <Topbar />
+            <Content className="content">
+               <div>
+                  <Select
+                     className="select"
+                     defaultValue="modules"
+                     style={{ width: 120 }}
+                     onChange={setModule}
+                  >
+                     <Option value="modules">Módulo</Option>
+                     <Option value="classes">Aula</Option>
+                  </Select>
+                  <Button
+                     type="primary"
+                     shape="default"
+                     className="select"
+                     icon={<PlusCircleOutlined />}
+                     size="large"
+                     onClick={() => {
+                        if (selectedView === "modules") {
+                           setCreateModuleModal(true);
+                        } else {
+                           setCreateClassModal(true);
+                        }
+                     }}
+                  >
+                     Adicionar
+                  </Button>
+               </div>
+               <Table
+                  className="table"
+                  dataSource={selectedView === "modules" ? modules : classes}
+                  columns={
+                     selectedView === "modules" ? modulesColumns : classColumns
+                  }
+               />
+            </Content>
+         </Layout>
+         <Modal
+            destroyOnClose={true}
+            title="Alterar módulo"
+            visible={moduleModalVisible}
+            onOk={() => patchModule(selectedModule)}
+            onCancel={closeModal}
+            okText="Fazer login"
+            cancelText="Cancelar"
+            width={400}
+         >
+            <Input
+               placeholder="Novo nome"
+               className="modalInput"
+               defaultValue={selectedModule.name}
+               onChange={(e) =>
+                  setSelectedModule((pre) => {
+                     return {
+                        ...pre,
+                        name: e.target.value,
+                     };
+                  })
+               }
+            />
+            <Input
+               placeholder="Nova tech"
+               className="modalInput"
+               defaultValue={selectedModule.tech}
+               onChange={(e) =>
+                  setSelectedModule((pre) => {
+                     return {
+                        ...pre,
+                        tech: e.target.value,
+                     };
+                  })
+               }
+            />
+         </Modal>
+         <Modal
+            destroyOnClose={true}
+            title="Alterar aula"
+            visible={classModalVisible}
+            onOk={() => patchClass(selectedClass)}
+            // confirmLoading={confirmLoading}
+            onCancel={closeModal}
+            okText="Fazer login"
+            cancelText="Cancelar"
+            width={400}
+         >
+            <Input
+               placeholder="Novo nome"
+               className="modalInput"
+               defaultValue={selectedClass.name}
+               onChange={(e) =>
+                  setSelectedClass((pre) => {
+                     return {
+                        ...pre,
+                        name: e.target.value,
+                     };
+                  })
+               }
+            />
+            <Input
+               placeholder="Nova data"
+               className="modalInput"
+               defaultValue={selectedClass.date}
+               onChange={(e) =>
+                  setSelectedClass((pre) => {
+                     return {
+                        ...pre,
+                        date: e.target.value,
+                     };
+                  })
+               }
+            />
+            <Input
+               placeholder="Nova duração"
+               className="modalInput"
+               defaultValue={selectedClass.durationInMinutes}
+               onChange={(e) =>
+                  setSelectedClass((pre) => {
+                     return {
+                        ...pre,
+                        durationInMinutes: Number(e.target.value),
+                     };
+                  })
+               }
+            />
+         </Modal>
+         <Modal
+            destroyOnClose={true}
+            title="Criar módulo"
+            visible={createModuleModal}
+            onOk={() => createModule(selectedModule)}
+            confirmLoading={isLoading}
+            onCancel={closeModal}
+            okText="Fazer login"
+            cancelText="Cancelar"
+            width={400}
+         >
+            <Input
+               placeholder="Nome"
+               className="modalInput"
+               onChange={(e) =>
+                  setSelectedModule((pre) => {
+                     return {
+                        ...pre,
+                        name: e.target.value,
+                     };
+                  })
+               }
+            />
+            <Input
+               placeholder="Tech"
+               className="modalInput"
+               onChange={(e) =>
+                  setSelectedModule((pre) => {
+                     return {
+                        ...pre,
+                        tech: e.target.value,
+                     };
+                  })
+               }
+            />
+         </Modal>
+         <Modal
+            destroyOnClose={true}
+            title="Criar aula"
+            visible={createClassModal}
+            onOk={() => createClass(selectedClass)}
+            confirmLoading={isLoading}
+            onCancel={closeModal}
+            okText="Fazer login"
+            cancelText="Cancelar"
+            width={400}
+         >
+            <Input
+               placeholder="Nome"
+               className="modalInput"
+               onChange={(e) =>
+                  setSelectedClass((pre) => {
+                     return {
+                        ...pre,
+                        name: e.target.value,
+                     };
+                  })
+               }
+            />
+            <Input
+               placeholder="Data"
+               className="modalInput"
+               onChange={(e) =>
+                  setSelectedClass((pre) => {
+                     return {
+                        ...pre,
+                        date: e.target.value,
+                     };
+                  })
+               }
+            />
+            <Input
+               placeholder="Duração"
+               className="modalInput"
+               onChange={(e) =>
+                  setSelectedClass((pre) => {
+                     return {
+                        ...pre,
+                        durationInMinutes: Number(e.target.value),
+                     };
+                  })
+               }
+            />
+            <Select
+               defaultValue={modules[0].id}
+               className="select"
+               style={{ width: 340 }}
+               onChange={(moduleId) =>
+                  setSelectedClass((pre) => {
+                     return {
+                        ...pre,
+                        moduleId: moduleId,
+                     };
+                  })
+               }
+            >
+               {modules.map((module, index) => {
+                  return <Option value={module.id}>{module.name}</Option>;
+               })}
+            </Select>
+         </Modal>
+      </>
    );
 }

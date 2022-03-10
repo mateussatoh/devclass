@@ -1,8 +1,9 @@
 import Cookies from "js-cookie";
 import { createContext, useState, useEffect } from "react";
 
-import AuthService from "../services/api.auth";
+import { loginService } from "../services/api.auth";
 import { useNavigate } from "react-router-dom";
+import { notification } from "antd";
 interface IUserAuthenticated {
    id: string;
    username: string;
@@ -38,14 +39,27 @@ function AuthProvider({ children }: Props) {
    }, []);
 
    async function login(username: string, password: string) {
-      const authResponse = await AuthService.login({ username, password });
-      setUserAuthenticated(authResponse);
-      const { access_token, ...user } = authResponse;
-      Cookies.set("access_token", access_token);
-      Cookies.set("user", user);
-      if (authResponse) {
-         setIsUserAuthenticated(true);
-      }
+      loginService({ username, password })
+         .then((authResponse) => {
+            setUserAuthenticated(authResponse);
+            const { access_token, ...user } = authResponse;
+            Cookies.set("access_token", access_token);
+            Cookies.set("user", user);
+            if (authResponse) {
+               setIsUserAuthenticated(true);
+            }
+            notification["success"]({
+               message: "Você foi autenticado.",
+               description: "A área do admin foi liberada.",
+            });
+         })
+         .catch(() => {
+            notification["error"]({
+               message: "Erro ao tentar autenticar",
+               description:
+                  "Verifique se o banco de dados local e a API foram iniciados, e se o usuário e a senha estão corretos.",
+            });
+         });
    }
 
    function logout() {
