@@ -35,7 +35,8 @@ interface IClass {
    name: string;
    date: string;
    durationInMinutes: number;
-   moduleId: string;
+   modulesId: string;
+   modulesName?: string;
 }
 
 const { Content } = Layout;
@@ -51,12 +52,22 @@ export default function Home() {
    const [createClassModal, setCreateClassModal] = useState(false);
    const [isLoading, setIsLoading] = useState(false);
 
+   const [sortedInfo, setSortedInfo] = useState({ order: "", columnKey: "" });
+
+   function handleTableChange(pagination: any, filters: any, sorter: any) {
+      setSortedInfo(sorter);
+   }
+
+   function clearFilters() {
+      setSortedInfo({ order: "", columnKey: "" });
+   }
+
    const [selectedClass, setSelectedClass] = useState({
       id: "",
       name: "",
       date: "",
       durationInMinutes: 0,
-      moduleId: "",
+      modulesId: "",
    });
    const [selectedModule, setSelectedModule] = useState({
       id: "",
@@ -66,25 +77,53 @@ export default function Home() {
 
    useEffect(() => {
       async function fetchData() {
-         const modules = await getModulesService();
-         const classes = await getClassesService();
+         const apiModules = await getModulesService();
+         const apiClasses = await getClassesService();
 
-         setModules(modules);
-         setClasses(classes);
+         const classesWithModules = apiClasses.map((_class: IClass) => {
+            const otherSubject = apiModules.find(
+               (module: IModule) => module.id === _class.modulesId
+            );
+
+            return { ..._class, modulesName: otherSubject.name };
+         });
+
+         setModules(apiModules);
+         setClasses(classesWithModules);
       }
       fetchData();
    }, []);
 
-   const modulesColumns = [
+   async function hydrate() {
+      const apiModules = await getModulesService();
+      const apiClasses = await getClassesService();
+
+      const classesWithModules = apiClasses.map((_class: IClass) => {
+         const otherSubject = apiModules.find(
+            (module: IModule) => module.id === _class.modulesId
+         );
+
+         return { ..._class, modulesName: otherSubject.name };
+      });
+
+      setModules(apiModules);
+      setClasses(classesWithModules);
+   }
+
+   const modulesColumns: any = [
       {
          title: "Nome",
          dataIndex: "name",
          key: "name",
+         sorter: (a: IModule, b: IModule) => a.name.length - b.name.length,
+         sortOrder: sortedInfo.columnKey === "name" && sortedInfo.order,
       },
       {
          title: "Tech",
          dataIndex: "tech",
          key: "tech",
+         sorter: (a: IModule, b: IModule) => a.tech.length - b.tech.length,
+         sortOrder: sortedInfo.columnKey === "tech" && sortedInfo.order,
       },
       {
          key: "actions",
@@ -115,21 +154,37 @@ export default function Home() {
       },
    ];
 
-   const classColumns = [
+   const classColumns: any = [
+      {
+         title: "Módulo",
+         dataIndex: "modulesName",
+         key: "modulesName",
+         defaultSortOrder: "descend",
+         sorter: (a: any, b: any) =>
+            a.modulesName.length - b.modulesName.length,
+         sortOrder: sortedInfo.columnKey === "modulesName" && sortedInfo.order,
+      },
       {
          title: "Nome",
          dataIndex: "name",
          key: "name",
+         sorter: (a: IClass, b: IClass) => a.name.length - b.name.length,
+         sortOrder: sortedInfo.columnKey === "name" && sortedInfo.order,
       },
       {
          title: "Data",
          dataIndex: "date",
          key: "date",
+         sorter: (a: IClass, b: IClass) => a.date.length - b.date.length,
+         sortOrder: sortedInfo.columnKey === "date" && sortedInfo.order,
       },
       {
          title: "Duração (min)",
          dataIndex: "durationInMinutes",
          key: "duration",
+         sorter: (a: IClass, b: IClass) =>
+            a.durationInMinutes - b.durationInMinutes,
+         sortOrder: sortedInfo.columnKey === "duration" && sortedInfo.order,
       },
       {
          key: "actions",
@@ -164,14 +219,16 @@ export default function Home() {
       setSelectedClass(selectedClass);
       setClassModalVisible(true);
    }
+
    async function patchClass(selectedClass: IClass) {
       setIsLoading(true);
       patchClassService(selectedClass)
-         .then(() => {
+         .then(async () => {
             notification["success"]({
                message: "Modificado com sucesso.",
                description: "",
             });
+            hydrate();
             closeModal();
          })
          .catch(() => {
@@ -189,11 +246,12 @@ export default function Home() {
    async function deleteClass(selectedClass: IClass) {
       setIsLoading(true);
       deleteClassService(selectedClass.id)
-         .then(() => {
+         .then(async () => {
             notification["success"]({
                message: "Deletado com sucesso.",
                description: "",
             });
+            hydrate();
             closeModal();
          })
          .catch(() => {
@@ -216,6 +274,7 @@ export default function Home() {
                message: "Deletado com sucesso.",
                description: "",
             });
+            hydrate();
             closeModal();
          })
          .catch(() => {
@@ -238,6 +297,7 @@ export default function Home() {
                message: "Criado com sucesso.",
                description: "",
             });
+            hydrate();
             closeModal();
          })
          .catch(() => {
@@ -266,6 +326,7 @@ export default function Home() {
                message: "Modificado com sucesso.",
                description: "",
             });
+            hydrate();
             closeModal();
          })
          .catch(() => {
@@ -289,6 +350,7 @@ export default function Home() {
                message: "Criado com sucesso.",
                description: "",
             });
+            hydrate();
             closeModal();
          })
          .catch(() => {
@@ -310,7 +372,7 @@ export default function Home() {
          name: "",
          date: "",
          durationInMinutes: 0,
-         moduleId: "",
+         modulesId: "",
       });
       setClassModalVisible(false);
       setModuleModalVisible(false);
@@ -320,6 +382,7 @@ export default function Home() {
 
    function setModule(selectedView: string) {
       setSelectedView(selectedView);
+      clearFilters();
    }
 
    return (
@@ -354,13 +417,21 @@ export default function Home() {
                      Adicionar
                   </Button>
                </div>
-               <Table
-                  className="table"
-                  dataSource={selectedView === "modules" ? modules : classes}
-                  columns={
-                     selectedView === "modules" ? modulesColumns : classColumns
-                  }
-               />
+               {selectedView === "modules" ? (
+                  <Table
+                     className="table"
+                     dataSource={modules}
+                     columns={modulesColumns}
+                     onChange={handleTableChange}
+                  />
+               ) : (
+                  <Table
+                     className="table"
+                     dataSource={classes}
+                     columns={classColumns}
+                     onChange={handleTableChange}
+                  />
+               )}
             </Content>
          </Layout>
          <Modal
@@ -369,7 +440,7 @@ export default function Home() {
             visible={moduleModalVisible}
             onOk={() => patchModule(selectedModule)}
             onCancel={closeModal}
-            okText="Fazer login"
+            okText="Salvar alterações"
             cancelText="Cancelar"
             width={400}
          >
@@ -407,7 +478,7 @@ export default function Home() {
             onOk={() => patchClass(selectedClass)}
             // confirmLoading={confirmLoading}
             onCancel={closeModal}
-            okText="Fazer login"
+            okText="Salvar alterações"
             cancelText="Cancelar"
             width={400}
          >
@@ -458,7 +529,7 @@ export default function Home() {
             onOk={() => createModule(selectedModule)}
             confirmLoading={isLoading}
             onCancel={closeModal}
-            okText="Fazer login"
+            okText="Criar"
             cancelText="Cancelar"
             width={400}
          >
@@ -494,7 +565,7 @@ export default function Home() {
             onOk={() => createClass(selectedClass)}
             confirmLoading={isLoading}
             onCancel={closeModal}
-            okText="Fazer login"
+            okText="Criar"
             cancelText="Cancelar"
             width={400}
          >

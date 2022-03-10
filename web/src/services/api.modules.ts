@@ -13,11 +13,7 @@ interface IModule {
    tech: string;
    id: string;
 }
-async function getModulesService(): Promise<
-   SetStateAction<
-      { name: string; tech: string; classes: never[]; id: string }[]
-   >
-> {
+async function getModulesService(): Promise<any> {
    const { data } = await Instance.get("");
    return data;
 }

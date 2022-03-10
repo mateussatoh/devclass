@@ -14,9 +14,9 @@ interface IClass {
    name: string;
    date: string;
    durationInMinutes: number;
-   moduleId: string;
+   modulesId: string;
 }
-async function getClassesService(): Promise<SetStateAction<never[]>> {
+async function getClassesService(): Promise<any> {
    const { data } = await Instance.get("");
    return data;
 }
@@ -35,13 +35,13 @@ async function createClassService(_class: IClass): Promise<void> {
       "🚀 ~ file: api.classes.ts ~ line 34 ~ createClassService ~ _class",
       _class
    );
-   const { name, date, durationInMinutes, moduleId } = _class;
+   const { name, date, durationInMinutes, modulesId } = _class;
 
    await Instance.post("", {
       name: name,
       date: date,
       durationInMinutes: durationInMinutes,
-      modulesId: moduleId,
+      modulesId: modulesId,
    });
 }
 
