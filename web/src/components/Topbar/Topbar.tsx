@@ -5,14 +5,14 @@ import {
    UserOutlined,
    LogoutOutlined,
 } from "@ant-design/icons";
-import { Modal, Button, Input, Typography, Select } from "antd";
+import { Modal, Button, Input, Typography, notification } from "antd";
 
 import "./Topbar.less";
 import Logo from "../../assets/Logo.png";
 import { Context } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
-import { Option } from "antd/lib/mentions";
 
+import { createUserService } from "../../services/api.users";
 export default function Topbar() {
    const AuthContext = useContext(Context);
 
@@ -20,6 +20,8 @@ export default function Topbar() {
    const [confirmLoading, setConfirmLoading] = useState(false);
    const [username, setUsername] = useState("");
    const [password, setPassword] = useState("");
+   const [email, setEmail] = useState("");
+   const [newAccountModal, setNewAccountModal] = useState(false);
 
    function showModal() {
       setVisible(true);
@@ -30,6 +32,32 @@ export default function Topbar() {
       await AuthContext?.login(username, password);
       setConfirmLoading(false);
       setVisible(false);
+   }
+
+   async function handleNewAccount(
+      username: string,
+      email: string,
+      password: string
+   ) {
+      setConfirmLoading(true);
+      createUserService({ username, email, password })
+         .then(() => {
+            notification["success"]({
+               message: "Conta criada com sucesso.",
+               description: "",
+            });
+         })
+         .catch(() => {
+            notification["error"]({
+               message: "Erro ao criar usuário",
+               description:
+                  "Verifique se o banco de dados local e a API foram iniciados.",
+            });
+         })
+         .finally(() => {
+            setConfirmLoading(false);
+            setNewAccountModal(false);
+         });
    }
 
    function handleCancel() {
@@ -97,6 +125,46 @@ export default function Topbar() {
                placeholder="Seu usuário"
                className="modalInput"
                onChange={(e) => setUsername(e.target.value)}
+            />
+            <Input
+               suffix={<LockOutlined />}
+               type="password"
+               placeholder="Senha"
+               className="modalInput"
+               onChange={(e) => setPassword(e.target.value)}
+            />
+            <h4
+               className="link"
+               onClick={() => {
+                  setVisible(false);
+                  setNewAccountModal(true);
+               }}
+            >
+               Não tenho uma conta
+            </h4>
+         </Modal>
+         <Modal
+            title="Crie uma conta devclass"
+            visible={newAccountModal}
+            onOk={() => handleNewAccount(username, email, password)}
+            confirmLoading={confirmLoading}
+            onCancel={handleCancel}
+            okText="Criar conta"
+            cancelText="Cancelar"
+            width={400}
+         >
+            <Input
+               suffix={<UserOutlined />}
+               placeholder="Seu usuário"
+               className="modalInput"
+               onChange={(e) => setUsername(e.target.value)}
+            />
+            <Input
+               suffix={<UserOutlined />}
+               placeholder="Seu email"
+               className="modalInput"
+               type="email"
+               onChange={(e) => setEmail(e.target.value)}
             />
             <Input
                suffix={<LockOutlined />}
