@@ -86,7 +86,7 @@ export default function ModulesSection() {
    }
 
    return (
-      <div>
+      <div className="moduleBackground">
          <Row style={{ height: "60px" }}></Row>
          <Row>
             <Col span={10} offset={1}>
